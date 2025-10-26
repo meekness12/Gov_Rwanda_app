@@ -12,7 +12,6 @@ public class VehicleDAO {
     public boolean addVehicle(Vehicle v) throws SQLException {
         String sql = "INSERT INTO vehicles (owner_id, plate_no, vehicle_type, fuel_type, manufacture_year, mileage) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -26,9 +25,7 @@ public class VehicleDAO {
             int rows = ps.executeUpdate();
             if (rows > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        v.setVehicleId(rs.getInt(1));
-                    }
+                    if (rs.next()) v.setVehicleId(rs.getInt(1));
                 }
                 return true;
             }
@@ -92,5 +89,33 @@ public class VehicleDAO {
             }
         }
         return list;
+    }
+
+    // ✅ Update vehicle
+    public boolean updateVehicle(Vehicle v) throws SQLException {
+        String sql = "UPDATE vehicles SET plate_no = ?, vehicle_type = ?, fuel_type = ?, manufacture_year = ?, mileage = ? WHERE vehicle_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, v.getPlateNo());
+            ps.setString(2, v.getVehicleType());
+            ps.setString(3, v.getFuelType());
+            ps.setInt(4, v.getManufactureYear());
+            ps.setInt(5, v.getMileage());
+            ps.setInt(6, v.getVehicleId());
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // ✅ Delete vehicle
+    public boolean deleteVehicle(int vehicleId) throws SQLException {
+        String sql = "DELETE FROM vehicles WHERE vehicle_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, vehicleId);
+            return ps.executeUpdate() > 0;
+        }
     }
 }
